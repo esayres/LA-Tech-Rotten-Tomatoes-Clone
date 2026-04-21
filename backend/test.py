@@ -10,7 +10,7 @@ load_dotenv(dotenv_path="backend/environments/.env")
 
 # Get path from .env
 cred_path = os.getenv("FIREBASE_CREDENTIALS")
-print(cred_path)
+print(cred_path) # testing if path is correct
 
 # Initialize Firebase
 cred = credentials.Certificate(cred_path)
@@ -19,10 +19,19 @@ firebase_admin.initialize_app(cred)
 # Example: Firestore DB
 db = firestore.client()
 
-# Test write (this = "working instance")
+# Test write
 doc_ref = db.collection("test").document("example")
 doc_ref.set({
-    "message": "Firebase is working!"
+"message": "Firebase is working!"
 })
 
 print("Data written successfully")
+
+# test read
+doc = doc_ref.get()
+
+if doc.exists:
+    print(f"data was read correctly! {doc.to_dict()}")
+else:
+    print("No such document!")
+
