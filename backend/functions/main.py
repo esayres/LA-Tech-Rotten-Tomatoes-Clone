@@ -4,21 +4,52 @@
 
 from firebase_functions import https_fn
 from firebase_functions.options import set_global_options
-from firebase_admin import initialize_app, auth
+from firebase_admin import initialize_app
+
+
 from authenticate import authenticateRequest
+from endpoints.movies import getMovies
+from endpoints.reviews import postReview
 
 # For cost control, you can set the maximum number of containers that can be
 # running at the same time. This helps mitigate the impact of unexpected
 # traffic spikes by instead downgrading performance. This limit is a per-function
 # limit. You can override the limit for each function using the max_instances
 # parameter in the decorator, e.g. @https_fn.on_request(max_instances=5).
+
+# this means that if there are more than 10 requests at the same time, it will start to queue them instead
 set_global_options(max_instances=10)
+
 
 initialize_app()
 #
 #
-# lets convert this hello world func to need some authentication, so only the user can send the requests and not a random
+
+
+# routing for the functions
 @https_fn.on_request()
+def api(req: https_fn.Request) -> https_fn.Response:
+    # we check the path of the request and route it to the correct function, 
+    # so i give them 1 base Url and a list of paths that they can send requests to, and it will route it to the correct function based on the path
+    path = req.path
+
+    # this is where we can add more endpoints, for example /getMovies, /postReview, etc...
+    routes = {
+        "/hello": on_request_example,
+        "/getMovies": getMovies,
+        "/getReview": postReview,
+    }
+
+    endpointFunction = routes.get(path) # this will get the function based on the path, if the path is not in the routes, returns None
+
+    if endpointFunction: # if the path is valid, it will call the function and return the response
+        return endpointFunction(req)
+
+    return https_fn.Response("Not found", status=404) # if not valid path, return not found
+
+
+
+# lets convert this hello world func to need some authentication, so only the user can send the requests and not a random
 def on_request_example(req: https_fn.Request) -> https_fn.Response:
     user, error = authenticateRequest(req)
 
@@ -35,5 +66,3 @@ def on_request_example(req: https_fn.Request) -> https_fn.Response:
 
 
 # what we need to solve next, we want authentication, so only the user can send the requests and not a random
-# i want rate limiting, so if the user sends too many requests, it doesnt just bill me for 100k
-# i also want to have basic error handling, and show casing 
