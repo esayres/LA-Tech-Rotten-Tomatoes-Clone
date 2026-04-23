@@ -1,6 +1,13 @@
-import init
+from firebase import getDB
 
-# we need a check database for movies etc..
-def getMovies(req: https_fn.Request) -> https_fn.Response:
-    # i dont think we have movies in database yet, but there is a test message so i can test if that works then replace it with movies later
-    return https_fn.Response("this will eventually return movies from the database!")
+def getMovies(req):
+    db = getDB() # gets the firestore database instance
+    docs = db.collection("movies").stream() # for now we are using the test message we created in ( EVENTUALLY IT WILL BE THE MOVIES COLLECTION WHEN ITS CREATED)
+
+    movies = []
+    for doc in docs:
+        movie = doc.to_dict()
+        movie["id"] = doc.id
+        movies.append(movie)
+
+    return movies

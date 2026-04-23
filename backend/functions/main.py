@@ -1,15 +1,12 @@
-# Welcome to Cloud Functions for Firebase for Python!
-# To get started, simply uncomment the below code or create your own.
-# Deploy with `firebase deploy`
-
 from firebase_functions import https_fn
 from firebase_functions.options import set_global_options
-from firebase_admin import initialize_app
 
 
 from authenticate import authenticateRequest
 from endpoints.movies import getMovies
-from endpoints.reviews import postReview
+from endpoints.interactions import postReview
+
+# Deploy with `firebase deploy`
 
 # For cost control, you can set the maximum number of containers that can be
 # running at the same time. This helps mitigate the impact of unexpected
@@ -21,11 +18,6 @@ from endpoints.reviews import postReview
 set_global_options(max_instances=10)
 
 
-initialize_app()
-#
-#
-
-
 # routing for the functions
 @https_fn.on_request()
 def api(req: https_fn.Request) -> https_fn.Response:
@@ -35,7 +27,7 @@ def api(req: https_fn.Request) -> https_fn.Response:
 
     # this is where we can add more endpoints, for example /getMovies, /postReview, etc...
     routes = {
-        "/hello": on_request_example,
+        "/hello": helloWorld,
         "/getMovies": getMovies,
         "/getReview": postReview,
     }
@@ -49,20 +41,15 @@ def api(req: https_fn.Request) -> https_fn.Response:
 
 
 
-# lets convert this hello world func to need some authentication, so only the user can send the requests and not a random
-def on_request_example(req: https_fn.Request) -> https_fn.Response:
+
+# hello World function, tests authentication
+def helloWorld(req: https_fn.Request) -> https_fn.Response:
     user, error = authenticateRequest(req)
 
     if error:
-        return https_fn.Response(
-            f"Unauthorized: {error}",
-            status=401
-        )
+        return https_fn.Response(f"Unauthorized: {error}", status=404)
 
     # Now you're authenticated
     uid = user["uid"]
 
     return https_fn.Response(f"Hello {uid}!")
-
-
-# what we need to solve next, we want authentication, so only the user can send the requests and not a random
