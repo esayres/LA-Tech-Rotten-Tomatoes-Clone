@@ -9,5 +9,8 @@ def initFirebase():
         firebase_admin.initialize_app()
 
 def getDB():
+    """
+    will initalize Firebase app only once and then return a instance of firestore Database
+    """
     initFirebase()
     return firestore.client()

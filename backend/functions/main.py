@@ -21,6 +21,11 @@ set_global_options(max_instances=10)
 # routing for the functions
 @https_fn.on_request()
 def api(req: https_fn.Request) -> https_fn.Response:
+    """
+    Base api connection point, Routes to every Endpoint 
+    Given a path in the base url, you can change the destination to several endpoints
+    """
+
     # we check the path of the request and route it to the correct function, 
     # so i give them 1 base Url and a list of paths that they can send requests to, and it will route it to the correct function based on the path
     path = req.path
@@ -44,6 +49,11 @@ def api(req: https_fn.Request) -> https_fn.Response:
 
 # hello World function, tests authentication
 def helloWorld(req: https_fn.Request) -> https_fn.Response:
+    """
+    Hello World endpoint, a test for authentication
+    If a idToken was given in the header, it will authenicate it with firebase and say Hello
+    If a IdToken is invalid or not given, it will return Unauthorized
+    """
     user, error = authenticateRequest(req)
 
     if error:
