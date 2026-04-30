@@ -31,7 +31,7 @@ def helloWorld(req):
     res = authenticateRequest(req)
 
     if res["ok"] is False:
-        return jsonResponse({"ok": False, f"Unauthorized": {res["error"]}}, status=404)
+        return jsonResponse({"ok": False, "unauthorized": {res["error"]}}, status=404)
 
     # Now you're authenticated
     uid = res["user"]["uid"]

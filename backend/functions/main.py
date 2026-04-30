@@ -17,6 +17,15 @@ from endpoints.interactions import postUserReview, getReviews, postUserLike, get
 set_global_options(max_instances=10)
 
 
+"""
+all requests should follow one of these 3 patterns:
+
+{"ok": True, "data": data}                      ->              Success (request was properly processed)
+{"ok": False, "error": error_msg}               ->              Failed (some error happened and it will tell you why)
+{"ok": False, "unauthorized": error_msg}        ->              Failed (not a authorized user)
+"""
+
+
 # routing for the functions
 @https_fn.on_request()
 def api(req: https_fn.Request) -> https_fn.Response:
@@ -52,5 +61,6 @@ def api(req: https_fn.Request) -> https_fn.Response:
         return endpointFunction(req)
 
     return jsonResponse({"ok": False, "error": "Endpoint not found"}, status=404) # if not valid path, return not found
+
 
 

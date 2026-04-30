@@ -1,8 +1,9 @@
 from authenticate import authenticateRequest
 from firebase import getDB, jsonResponse
 from validate import validateMovie, validateReview
-import json
 # this file will handle reviews, ratings, likes/dislikes, comments, etc.. 
+
+# lowkey this is getting long i probly will split this file into reviews, likes seperately      [IMPORTANT]
 
 # these need to be real-time
 
@@ -115,7 +116,7 @@ def postUserLike(req): # should handle both a dislike and a like
     res = authenticateRequest(req)
 
     if res["ok"] is False:
-         return jsonResponse({"ok": False, f"Unauthorized": {res["error"]}}, status=404)
+         return jsonResponse({"ok": False, f"unauthorized": {res["error"]}}, status=404)
     
 
     
