@@ -1,6 +1,5 @@
-from firebase_functions import https_fn
 from authenticate import authenticateRequest
-from firebase import getDB
+from firebase import getDB, jsonResponse
 from validate import validateMovie, validateReview
 import json
 # this file will handle reviews, ratings, likes/dislikes, comments, etc.. 
@@ -12,26 +11,22 @@ def postReview(req):
     # 1. Authenticate
     res = authenticateRequest(req)
     if not res["ok"]:
-        return https_fn.Response(json.dumps({"ok":False, "unauthorized": res['error']}), status=401, mimetype="application/json")
+        return jsonResponse({"ok":False, "unauthorized": res['error']}, status=401)
 
     db = getDB()
     uid = res["user"]["uid"]
 
     # 2. Parse JSON body
-    try:
-        body = req.get_json()
-    except Exception:
-        return https_fn.Response(json.dumps({"ok":False, "error": "Invalid JSON"}), status=400, mimetype="application/json")
-
+    body = req.get_json(silent=True)
     if not body:
-        return https_fn.Response(json.dumps({"ok":False, "error": "Missing Body"}), status=400, mimetype="application/json")
+        return jsonResponse({"ok":False, "error": "Missing Body"}, status=400)
 
     # 3. Extract fields
     movieId = body.get("movieId")
     text = body.get("text")
 
     if not movieId or not text:
-        return https_fn.Response(json.dumps({"ok":False, "error":"Missing required fields (movieId, text)"}), mimetype="application/json")
+        return jsonResponse({"ok":False, "error":"Missing required fields (movieId, text)"}, status=404)
 
     # 4. Build clean object
     reviewData = {
@@ -42,16 +37,16 @@ def postReview(req):
 
     # 4b. Check if movieID is valid
     if not validateMovie(reviewData["movieId"]):
-        return https_fn.Response(json.dumps({"ok": False, "error": "Given movieId is not in Database"}), mimetype="application/json")
+        return jsonResponse({"ok": False, "error": "Given movieId is not in Database"}, status=404)
 
     # 4c. Check if movieReview is already in database
-    if not validateReview(reviewData["text"], uid):
-        return https_fn.Response(json.dumps({"ok": False,"error": "Given review is already in Database"}), mimetype="application/json")
+    if validateReview(reviewData["text"], uid):
+        return jsonResponse({"ok": False,"error": "Given review is already in Database"}, status=404)
 
     # 5. posting to data base
     db.collection("reviews").add(reviewData)
 
-    return https_fn.Response(json.dumps({"ok": True, "data": reviewData}), mimetype="application/json")
+    return jsonResponse({"ok": True, "data": reviewData})
 
 
 
@@ -60,7 +55,7 @@ def postLike(req): # should handle both a dislike and a like
     res = authenticateRequest(req)
 
     if res["ok"] is False:
-        return https_fn.Response(f"Unauthorized: {res["error"]}", status=404)
+        return jsonResponse(f"Unauthorized: {res["error"]}", status=404)
     
 
     
@@ -71,7 +66,7 @@ def postComment(req):
     res = authenticateRequest(req)
 
     if res["ok"] is False:
-        return https_fn.Response(f"Unauthorized: {res["error"]}", status=404)
+        return jsonResponse(f"Unauthorized: {res["error"]}", status=404)
     
 
     return  "NOT IMPLEMENTED YET"
@@ -84,10 +79,7 @@ def getReviews(req):
     """
     res = authenticateRequest(req)
     if not res["ok"]:
-        return https_fn.Response(
-            f"Unauthorized: {res['error']}",
-            status=401
-        )
+        return jsonResponse({"ok":False, "unauthorized": res['error']}, status=401)
     
     uid = res["user"]["id"]
 

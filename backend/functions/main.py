@@ -3,10 +3,8 @@ from firebase_functions.options import set_global_options
 from firebase import initFirebase
 
 
-from authenticate import authenticateRequest
-from endpoints.movies import getMovies
+from endpoints.movies import getMovies, helloWorld
 from endpoints.interactions import postReview
-import json
 # Deploy with `firebase deploy`
 
 # For cost control, you can set the maximum number of containers that can be
@@ -47,21 +45,3 @@ def api(req: https_fn.Request) -> https_fn.Response:
     return https_fn.Response("Not found", status=404) # if not valid path, return not found
 
 
-
-
-# hello World function, tests authentication
-def helloWorld(req: https_fn.Request) -> https_fn.Response:
-    """
-    Hello World endpoint, a test for authentication
-    If a idToken was given in the header, it will authenicate it with firebase and say Hello
-    If a IdToken is invalid or not given, it will return Unauthorized
-    """
-    res = authenticateRequest(req)
-
-    if res["ok"] is False:
-        return https_fn.Response(f"Unauthorized: {res["error"]}", status=404)
-
-    # Now you're authenticated
-    uid = res["user"]["uid"]
-
-    return https_fn.Response(f"Hello {uid}!")

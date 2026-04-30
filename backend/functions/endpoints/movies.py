@@ -1,4 +1,5 @@
-from firebase import getDB
+from firebase import getDB, jsonResponse
+from authenticate import authenticateRequest 
 
 def getMovies(req):
     """
@@ -15,4 +16,22 @@ def getMovies(req):
 
     # error handling should be added + log monitoring too maybe
 
-    return movies
+    return jsonResponse({movies})
+
+
+# hello World function, tests authentication
+def helloWorld(req):
+    """
+    Hello World endpoint, a test for authentication
+    If a idToken was given in the header, it will authenicate it with firebase and say Hello
+    If a IdToken is invalid or not given, it will return Unauthorized
+    """
+    res = authenticateRequest(req)
+
+    if res["ok"] is False:
+        return jsonResponse(f"Unauthorized: {res["error"]}", status=404)
+
+    # Now you're authenticated
+    uid = res["user"]["uid"]
+
+    return jsonResponse({f"Hello {uid}!"})
