@@ -13,7 +13,10 @@ def authenticateRequest(request):
     authHeader = request.headers.get("Authorization") # grabs the authorization header (i.e {'Authorization': "bearer <token>"})
 
     if not authHeader or not authHeader.startswith("Bearer "): # checks if the header is valid, returns error if not
-        return None, "Missing or invalid Authorization header"
+        return {
+            "ok": False,
+            "error": "Missing or invalid Authorization header"
+        }
 
     try:
         idToken = authHeader.split("Bearer ")[1]
@@ -25,7 +28,7 @@ def authenticateRequest(request):
             "user": {
                 "uid": decodedToken["uid"],
                 "email": decodedToken.get("email"),
-                "auth_time": decodedToken.get("auth_time")
+                "authTime": decodedToken.get("auth_time")
             }
         }
 

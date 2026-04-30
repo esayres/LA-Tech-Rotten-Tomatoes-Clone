@@ -1,5 +1,6 @@
 from firebase_functions import https_fn
 from authenticate import authenticateRequest
+from firebase import getDB
 # this file will handle reviews, ratings, likes/dislikes, comments, etc.. 
 
 # these need to be real-time
@@ -14,6 +15,7 @@ def postReview(req):
             status=401
         )
 
+    #db = getDB()
     user = res["user"]
 
     # 2. Parse JSON body

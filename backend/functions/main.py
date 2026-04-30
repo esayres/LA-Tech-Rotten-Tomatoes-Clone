@@ -1,5 +1,6 @@
 from firebase_functions import https_fn
 from firebase_functions.options import set_global_options
+from firebase import initFirebase
 
 
 from authenticate import authenticateRequest
@@ -40,6 +41,7 @@ def api(req: https_fn.Request) -> https_fn.Response:
     endpointFunction = routes.get(path) # this will get the function based on the path, if the path is not in the routes, returns None
 
     if endpointFunction: # if the path is valid, it will call the function and return the response
+        initFirebase()
         return endpointFunction(req)
 
     return https_fn.Response("Not found", status=404) # if not valid path, return not found
@@ -60,6 +62,6 @@ def helloWorld(req: https_fn.Request) -> https_fn.Response:
         return https_fn.Response(f"Unauthorized: {res["error"]}", status=404)
 
     # Now you're authenticated
-    uid = res["uid"]
+    uid = res["user"]["uid"]
 
     return https_fn.Response(f"Hello {uid}!")
