@@ -12,10 +12,7 @@ def postReview(req):
     # 1. Authenticate
     res = authenticateRequest(req)
     if not res["ok"]:
-        return https_fn.Response(
-            f"Unauthorized: {res['error']}",
-            status=401
-        )
+        return https_fn.Response(json.dumps({"ok":False, "unauthorized": res['error']}), status=401, mimetype="application/json")
 
     db = getDB()
     uid = res["user"]["uid"]
@@ -24,18 +21,17 @@ def postReview(req):
     try:
         body = req.get_json()
     except Exception:
-        return https_fn.Response("Invalid JSON", status=400)
+        return https_fn.Response(json.dumps({"ok":False, "error": "Invalid JSON"}), status=400, mimetype="application/json")
 
     if not body:
-        return https_fn.Response("Missing body", status=400)
+        return https_fn.Response(json.dumps({"ok":False, "error": "Missing Body"}), status=400, mimetype="application/json")
 
     # 3. Extract fields
     movieId = body.get("movieId")
     text = body.get("text")
 
     if not movieId or not text:
-        return https_fn.Response(
-            json.dumps({"ok":False, "error":"Missing required fields (movieId, text)"}, mimetype="application/json"))
+        return https_fn.Response(json.dumps({"ok":False, "error":"Missing required fields (movieId, text)"}), mimetype="application/json")
 
     # 4. Build clean object
     reviewData = {

@@ -2,7 +2,7 @@ from firebase import getDB
 
 # if given the time, re-Factor this code, its reimplementing getMovies, getReviews which i dont love buts working for now
 
-def validateMovie(movieID):
+def validateMovie(movieId):
     """
     checks if a given movieID is in the database
     returns True if found,   False if not found 
@@ -17,7 +17,7 @@ def validateMovie(movieID):
         moviesList.append(movie)
 
     for movie in moviesList:
-        if movieID == movie["movieID"]:
+        if movieId == movie["movieId"]:
             return True
     return False
 
