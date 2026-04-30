@@ -18,7 +18,7 @@ def postReview(req):
         )
 
     db = getDB()
-    user = res["user"]
+    uid = res["user"]["uid"]
 
     # 2. Parse JSON body
     try:
@@ -39,7 +39,7 @@ def postReview(req):
 
     # 4. Build clean object
     reviewData = {
-        "userId": user["uid"],
+        "userId": uid,
         "movieId": movieId,
         "text": text,
     }
@@ -49,7 +49,7 @@ def postReview(req):
         return https_fn.Response(json.dumps({"ok": False, "error": "Given movieId is not in Database"}), mimetype="application/json")
 
     # 4c. Check if movieReview is already in database
-    if not validateReview(reviewData["text"], req):
+    if not validateReview(reviewData["text"], uid):
         return https_fn.Response(json.dumps({"ok": False,"error": "Given review is already in Database"}), mimetype="application/json")
 
     # 5. posting to data base
