@@ -7,11 +7,7 @@ import json
 # firebase deploy would hang and not deploy if firebase was intialized multiple times, so this is a way to prevent that from happening
 
 def jsonResponse(data, status=200):
-    return https_fn.Response(
-        json.dumps(data),
-        status=status,
-        mimetype="application/json"
-    )
+    return https_fn.Response(json.dumps(data), status=status, mimetype="application/json")
 
 
 def initFirebase():

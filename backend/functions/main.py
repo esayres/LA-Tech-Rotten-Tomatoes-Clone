@@ -4,7 +4,7 @@ from firebase import initFirebase
 
 
 from endpoints.movies import getMovies, helloWorld
-from endpoints.interactions import postReview
+from endpoints.interactions import postUserReview, getReviews, postUserLike, getUserLikes, getUserReviews
 # Deploy with `firebase deploy`
 
 # For cost control, you can set the maximum number of containers that can be
@@ -33,7 +33,12 @@ def api(req: https_fn.Request) -> https_fn.Response:
     routes = {
         "/hello": helloWorld,
         "/getMovies": getMovies,
-        "/postReview": postReview,
+        "/getReviews": getReviews, # not Implemented
+        "/getUserReviews": getUserReviews,
+        "/getUserLikes": getUserLikes, # not Implemented
+        "/postUserReview": postUserReview, # Not Implemented
+        "/postUserLike": postUserLike, # Not Implemented -> # should post to both movies db and also a seperate collum so i can see what user did what
+        # /getMovieScore <- NEEDED
     }
 
     endpointFunction = routes.get(path) # this will get the function based on the path, if the path is not in the routes, returns None
