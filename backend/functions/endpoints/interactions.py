@@ -27,7 +27,7 @@ def postUserReview(req):
     text = body.get("text")
 
     if not movieId or not text:
-        return jsonResponse({"ok":False, "error":"Missing required fields (movieId, text)"}, status=400)
+        return jsonResponse({"ok":False, "error": "Missing required fields (movieId, text)"}, status=400)
 
     # 4. Build clean object
     reviewData = {
