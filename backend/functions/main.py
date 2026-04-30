@@ -1,6 +1,6 @@
 from firebase_functions import https_fn
 from firebase_functions.options import set_global_options
-from firebase import initFirebase
+from firebase import initFirebase, jsonResponse
 
 
 from endpoints.movies import getMovies, helloWorld
@@ -31,14 +31,18 @@ def api(req: https_fn.Request) -> https_fn.Response:
 
     # this is where we can add more endpoints, for example /getMovies, /postReview, etc...
     routes = {
+        # testing
         "/hello": helloWorld,
+        # Movies
         "/getMovies": getMovies,
-        "/getReviews": getReviews, 
-        "/getUserReviews": getUserReviews,
-        "/getUserLikes": getUserLikes, # not Implemented
-        "/postUserReview": postUserReview, # Not Implemented
-        "/postUserLike": postUserLike, # Not Implemented -> # should post to both movies db and also a seperate collum so i can see what user did what
         # /getMovieScore <- NEEDED
+        # reviews
+        "/postUserReview": postUserReview,
+        "/getUserReviews": getUserReviews,
+        "/getReviews": getReviews, 
+        # likes
+        "/postUserLike": postUserLike, # Not Implemented -> # should post to both movies db and also a seperate collum so i can see what user did what
+        "/getUserLikes": getUserLikes, # not Implemented
     }
 
     endpointFunction = routes.get(path) # this will get the function based on the path, if the path is not in the routes, returns None
@@ -47,6 +51,6 @@ def api(req: https_fn.Request) -> https_fn.Response:
         initFirebase()
         return endpointFunction(req)
 
-    return https_fn.Response("Not found", status=404) # if not valid path, return not found
+    return jsonResponse({"ok": False, "error": "Endpoint not found"}, status=404) # if not valid path, return not found
 
 

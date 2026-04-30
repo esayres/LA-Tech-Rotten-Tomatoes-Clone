@@ -49,45 +49,6 @@ def postUserReview(req):
     return jsonResponse({"ok": True, "data": reviewData})
 
 
-
-def postUserLike(req): # should handle both a dislike and a like
-    # authenticate user
-    res = authenticateRequest(req)
-
-    if res["ok"] is False:
-         return jsonResponse({"ok": False, f"Unauthorized": {res["error"]}}, status=404)
-    
-
-    
-    return  "NOT IMPLEMENTED YET" # we will implement this later
-
-
-def getUserLikes(req): # NOT IMPLEMENTED
-    """
-    accesses database for reviews collection and then returns all the reviews given user has done
-    """
-    res = authenticateRequest(req)
-    if not res["ok"]:
-        return jsonResponse({"ok":False, "unauthorized": res['error']}, status=401)
-    
-    uid = res["user"]["id"]
-
-    db = getDB() # gets the firestore database instance
-    docs = db.collection("reviews").stream()
-
-    reviews = []
-    for doc in docs:
-        review = doc.to_dict()
-        review["id"] = doc.id
-        if review["userid"] == uid:
-            reviews.append(reviews)
-
-    # error handling should be added + log monitoring too maybe
-
-    return jsonResponse(reviews)
-
-
-
 def getUserReviews(req):
     """
     accesses database for reviews collection and then returns all the reviews given user has done
@@ -147,4 +108,41 @@ def getReviews(req): # for a single movie (post)
 
     return jsonResponse({"ok": True, "data": reviews})
 
+
+
+def postUserLike(req): # should handle both a dislike and a like
+    # authenticate user
+    res = authenticateRequest(req)
+
+    if res["ok"] is False:
+         return jsonResponse({"ok": False, f"Unauthorized": {res["error"]}}, status=404)
+    
+
+    
+    return  "NOT IMPLEMENTED YET" # we will implement this later
+
+
+def getUserLikes(req): # NOT IMPLEMENTED
+    """
+    accesses database for reviews collection and then returns all the reviews given user has done
+    """
+    res = authenticateRequest(req)
+    if not res["ok"]:
+        return jsonResponse({"ok":False, "unauthorized": res['error']}, status=401)
+    
+    uid = res["user"]["id"]
+
+    db = getDB() # gets the firestore database instance
+    docs = db.collection("reviews").stream()
+
+    reviews = []
+    for doc in docs:
+        review = doc.to_dict()
+        review["id"] = doc.id
+        if review["userid"] == uid:
+            reviews.append(reviews)
+
+    # error handling should be added + log monitoring too maybe
+
+    return jsonResponse(reviews)
     # error handling should be added + log monitoring too maybe
