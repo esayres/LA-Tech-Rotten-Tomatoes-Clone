@@ -15,6 +15,8 @@ def getMovies(req):
         movies.append(movie)
 
     # error handling should be added + log monitoring too maybe
+    if not movies:
+        movies = "No movies Found"
 
     return jsonResponse({"ok": True, "data": movies})
 

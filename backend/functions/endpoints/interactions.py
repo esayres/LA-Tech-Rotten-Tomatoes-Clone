@@ -142,6 +142,9 @@ def getReviews(req): # for a single movie (post)
         review["id"] = doc.id
         reviews.append(review)
 
+    if not reviews:
+        reviews = "No Reviews Found"
+
     return jsonResponse({"ok": True, "data": reviews})
 
     # error handling should be added + log monitoring too maybe

@@ -33,7 +33,7 @@ def api(req: https_fn.Request) -> https_fn.Response:
     routes = {
         "/hello": helloWorld,
         "/getMovies": getMovies,
-        "/getReviews": getReviews, # not Implemented
+        "/getReviews": getReviews, 
         "/getUserReviews": getUserReviews,
         "/getUserLikes": getUserLikes, # not Implemented
         "/postUserReview": postUserReview, # Not Implemented
