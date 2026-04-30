@@ -34,7 +34,7 @@ def api(req: https_fn.Request) -> https_fn.Response:
     routes = {
         "/hello": helloWorld,
         "/getMovies": getMovies,
-        "/getReview": postReview,
+        "/postReview": postReview,
     }
 
     endpointFunction = routes.get(path) # this will get the function based on the path, if the path is not in the routes, returns None
@@ -54,12 +54,12 @@ def helloWorld(req: https_fn.Request) -> https_fn.Response:
     If a idToken was given in the header, it will authenicate it with firebase and say Hello
     If a IdToken is invalid or not given, it will return Unauthorized
     """
-    user, error = authenticateRequest(req)
+    res = authenticateRequest(req)
 
-    if error:
-        return https_fn.Response(f"Unauthorized: {error}", status=404)
+    if res["ok"] is False:
+        return https_fn.Response(f"Unauthorized: {res["error"]}", status=404)
 
     # Now you're authenticated
-    uid = user["uid"]
+    uid = res["uid"]
 
     return https_fn.Response(f"Hello {uid}!")
