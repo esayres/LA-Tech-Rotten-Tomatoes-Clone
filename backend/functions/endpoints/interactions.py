@@ -58,7 +58,7 @@ def getUserReviews(req):
     if not res["ok"]:
         return jsonResponse({"ok":False, "unauthorized": res['error']}, status=401)
     
-    uid = res["user"]["id"]
+    uid = res["user"]["uid"]
 
     db = getDB() # gets the firestore database instance
     docs = db.collection("reviews").stream()
@@ -131,7 +131,7 @@ def getUserLikes(req): # NOT IMPLEMENTED
     if not res["ok"]:
         return jsonResponse({"ok":False, "unauthorized": res['error']}, status=401)
     
-    uid = res["user"]["id"]
+    uid = res["user"]["uid"]
 
     db = getDB() # gets the firestore database instance
     docs = db.collection("reviews").stream()
