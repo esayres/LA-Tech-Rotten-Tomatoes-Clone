@@ -16,7 +16,7 @@ def getMovies(req):
 
     # error handling should be added + log monitoring too maybe
 
-    return jsonResponse(movies)
+    return jsonResponse({"ok": True, "data": movies})
 
 
 # hello World function, tests authentication
@@ -29,9 +29,9 @@ def helloWorld(req):
     res = authenticateRequest(req)
 
     if res["ok"] is False:
-        return jsonResponse(f"Unauthorized: {res["error"]}", status=404)
+        return jsonResponse({"ok": False, f"Unauthorized": {res["error"]}}, status=404)
 
     # Now you're authenticated
     uid = res["user"]["uid"]
 
-    return jsonResponse(f"Hello {uid}!")
+    return jsonResponse({"ok": True, "data": f"Hello {uid}!"})

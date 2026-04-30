@@ -26,7 +26,7 @@ def postUserReview(req):
     text = body.get("text")
 
     if not movieId or not text:
-        return jsonResponse({"ok":False, "error":"Missing required fields (movieId, text)"}, status=404)
+        return jsonResponse({"ok":False, "error":"Missing required fields (movieId, text)"}, status=400)
 
     # 4. Build clean object
     reviewData = {
@@ -41,7 +41,7 @@ def postUserReview(req):
 
     # 4c. Check if movieReview is already in database
     if validateReview(reviewData["text"], uid):
-        return jsonResponse({"ok": False,"error": "Given review is already in Database"}, status=404)
+        return jsonResponse({"ok": False, "error": "Given review is already in Database"}, status=404)
 
     # 5. posting to data base
     db.collection("reviews").add(reviewData)
@@ -55,7 +55,7 @@ def postUserLike(req): # should handle both a dislike and a like
     res = authenticateRequest(req)
 
     if res["ok"] is False:
-        return jsonResponse(f"Unauthorized: {res["error"]}", status=404)
+         return jsonResponse({"ok": False, f"Unauthorized": {res["error"]}}, status=404)
     
 
     
@@ -106,33 +106,42 @@ def getUserReviews(req):
         review = doc.to_dict()
         review["id"] = doc.id
         if review["userid"] == uid:
-            reviews.append(reviews)
+            reviews.append(review)
 
     # error handling should be added + log monitoring too maybe
 
-    return jsonResponse(reviews)
+    return jsonResponse({"ok": True, "data": reviews})
 
 
-def getReviews(req): # for a single movie NOT IMPLEMENTED
+def getReviews(req): # for a single movie (post)
     """
-    accesses database for reviews collection and then returns all the reviews given user has done
+    accesses database for reviews collection and then returns all the reviews given movieID has done
     """
-    res = authenticateRequest(req)
-    if not res["ok"]:
-        return jsonResponse({"ok":False, "unauthorized": res['error']}, status=401)
-    
-    uid = res["user"]["id"]
+
+    # given a movieID -> return all reviews for that movie
+
+    # parse for movieID
+    # 2. Parse JSON body
+    body = req.get_json(silent=True)
+    if not body:
+        return jsonResponse({"ok":False, "error": "Missing Body"}, status=400)
+
+    # 3. Extract fields
+    movieId = body.get("movieId")
+
+    if not movieId:
+        return jsonResponse({"ok":False, "error":"Missing required field (movieId)"}, status=400)
+
 
     db = getDB() # gets the firestore database instance
-    docs = db.collection("reviews").stream()
+    query = (db.collection("reviews").where("movieId", "==", movieId).stream())
 
     reviews = []
-    for doc in docs:
+    for doc in query:
         review = doc.to_dict()
         review["id"] = doc.id
-        if review["userid"] == uid:
-            reviews.append(reviews)
+        reviews.append(review)
+
+    return jsonResponse({"ok": True, "data": reviews})
 
     # error handling should be added + log monitoring too maybe
-
-    return jsonResponse(reviews)
