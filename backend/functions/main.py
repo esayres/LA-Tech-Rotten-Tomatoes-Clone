@@ -6,7 +6,7 @@ from firebase import initFirebase
 from authenticate import authenticateRequest
 from endpoints.movies import getMovies
 from endpoints.interactions import postReview
-
+import json
 # Deploy with `firebase deploy`
 
 # For cost control, you can set the maximum number of containers that can be
