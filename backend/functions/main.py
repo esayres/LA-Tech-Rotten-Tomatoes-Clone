@@ -44,7 +44,7 @@ def api(req: https_fn.Request) -> https_fn.Response:
         "/hello": helloWorld,
         # Movies
         "/getMovies": getMovies,
-        # /getMovieScore <- NEEDED
+        # /getMovieScore <- NEEDED -> returns avgs, %'s, etc...
         # reviews
         "/postUserReview": postUserReview,
         "/getUserReviews": getUserReviews,
