@@ -1,14 +1,20 @@
 from authenticate import authenticateRequest
 from firebase import getDB, jsonResponse
 from validate import validateMovie, validateReview
-# this file will handle reviews, ratings, likes/dislikes, comments, etc.. 
-
-# lowkey this is getting long i probly will split this file into reviews, likes seperately      [IMPORTANT]
-
-# these need to be real-time
+# this file will handle reviews/comments
 
 # auth Needed
 def postUserReview(req):
+    """
+    how is request formated:
+    {header: "Authorization": bearer <idToken>}
+
+    payload:
+        {
+        "movieid: int,       (the movieID)
+        "review": string       (the review text)
+        }
+    """
     # 1. Authenticate
     res = authenticateRequest(req)
     if not res["ok"]:
@@ -24,16 +30,16 @@ def postUserReview(req):
 
     # 3. Extract fields
     movieId = body.get("movieId")
-    text = body.get("text")
+    review = body.get("review")
 
-    if not movieId or not text:
-        return jsonResponse({"ok":False, "error": "Missing required fields (movieId, text)"}, status=400)
+    if movieId is None or review is None:
+        return jsonResponse({"ok":False, "error": "Missing required fields (movieId, review)"}, status=400)
 
     # 4. Build clean object
     reviewData = {
         "userId": uid,
         "movieId": movieId,
-        "text": text,
+        "review": review,
     }
 
     # 4b. Check if movieID is valid
@@ -41,7 +47,7 @@ def postUserReview(req):
         return jsonResponse({"ok": False, "error": "Given movieId is not in Database"}, status=404)
 
     # 4c. Check if movieReview is already in database
-    if validateReview(reviewData["text"], uid):
+    if validateReview(reviewData["review"], uid):
         return jsonResponse({"ok": False, "error": "Given review is already in Database"}, status=404)
 
     # 5. posting to data base
@@ -50,6 +56,7 @@ def postUserReview(req):
     return jsonResponse({"ok": True, "data": reviewData})
 
 
+# auth Needed
 def getUserReviews(req):
     """
     accesses database for reviews collection and then returns all the reviews given user has done
@@ -91,7 +98,7 @@ def getReviews(req): # for a single movie (post)
     # 3. Extract fields
     movieId = body.get("movieId")
 
-    if not movieId:
+    if movieId is None:
         return jsonResponse({"ok":False, "error":"Missing required field (movieId)"}, status=400)
 
 
@@ -108,42 +115,3 @@ def getReviews(req): # for a single movie (post)
         reviews = "No Reviews Found"
 
     return jsonResponse({"ok": True, "data": reviews})
-
-
-
-def postUserLike(req): # should handle both a dislike and a like
-    # authenticate user
-    res = authenticateRequest(req)
-
-    if res["ok"] is False:
-         return jsonResponse({"ok": False, f"unauthorized": {res["error"]}}, status=404)
-    
-
-    
-    return  "NOT IMPLEMENTED YET" # we will implement this later
-
-
-def getUserLikes(req): # NOT IMPLEMENTED
-    """
-    accesses database for reviews collection and then returns all the reviews given user has done
-    """
-    res = authenticateRequest(req)
-    if not res["ok"]:
-        return jsonResponse({"ok":False, "unauthorized": res['error']}, status=401)
-    
-    uid = res["user"]["uid"]
-
-    db = getDB() # gets the firestore database instance
-    docs = db.collection("reviews").stream()
-
-    reviews = []
-    for doc in docs:
-        review = doc.to_dict()
-        review["id"] = doc.id
-        if review["userid"] == uid:
-            reviews.append(reviews)
-
-    # error handling should be added + log monitoring too maybe
-
-    return jsonResponse(reviews)
-    # error handling should be added + log monitoring too maybe

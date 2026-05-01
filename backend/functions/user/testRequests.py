@@ -14,7 +14,7 @@ load_dotenv(envPath)
 baseURL = os.getenv("BASEURL")
 urlEndpoint = f"{baseURL}/postReview" # this is the endpoint for the hello world func
 
-urlEndpoint2 = f"{baseURL}/getReviews"
+urlEndpoint2 = f"{baseURL}/postUserLike"
 
 #res = requests.get(urlEndpoint2)
 #print("Sending request without token....")
@@ -59,8 +59,8 @@ headers = {
 }
 
 payload = {
-    "movieId": 1
-    #"text": "This movie was actually really good."
+    "movieId": 1,
+    "rating": "dislike"
 }
 
 res = requests.post(urlEndpoint2, json=payload, headers=headers)

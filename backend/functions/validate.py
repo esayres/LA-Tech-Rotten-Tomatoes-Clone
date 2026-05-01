@@ -31,6 +31,20 @@ def validateReview(movieReview, uid):
 
     for doc in docs:
         review = doc.to_dict()
-        if review["userId"] == uid and review["text"] == movieReview: # the same user already sent this review to database (prevents duplicates)
+        if review["userId"] == uid and review["review"] == movieReview: # the same user already sent this review to database (prevents duplicates)
             return True     
     return False
+
+
+def validateLike(movieId, uid):
+    """
+    checks if a given user like/dislike is already in the database from the same user (prevents user-specific duplicates)
+    returns True if found,      False if not found
+    """
+    db = getDB() # gets the firestore database instance
+    query = (db.collection("likes").where("userId", "==", uid).where("movieId", "==", movieId).limit(1).stream())
+
+    for _ in query: # found
+        return True
+
+    return False # not found

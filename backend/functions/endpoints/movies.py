@@ -27,6 +27,11 @@ def helloWorld(req):
     Hello World endpoint, a test for authentication
     If a idToken was given in the header, it will authenicate it with firebase and say Hello
     If a IdToken is invalid or not given, it will return Unauthorized
+
+
+    how is request formated:
+    {header: "Authorization": bearer <idToken>}
+
     """
     res = authenticateRequest(req)
 

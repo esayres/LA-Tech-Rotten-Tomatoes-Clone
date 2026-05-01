@@ -4,7 +4,8 @@ from firebase import initFirebase, jsonResponse
 
 
 from endpoints.movies import getMovies, helloWorld
-from endpoints.interactions import postUserReview, getReviews, postUserLike, getUserLikes, getUserReviews
+from endpoints.reviews import postUserReview, getReviews, getUserReviews
+from endpoints.likes import postUserLike, getUserLikes
 # Deploy with `firebase deploy`
 
 # For cost control, you can set the maximum number of containers that can be
@@ -50,7 +51,7 @@ def api(req: https_fn.Request) -> https_fn.Response:
         "/getUserReviews": getUserReviews,
         "/getReviews": getReviews, 
         # likes
-        "/postUserLike": postUserLike, # Not Implemented -> # should post to both movies db and also a seperate collum so i can see what user did what
+        "/postUserLike": postUserLike,
         "/getUserLikes": getUserLikes, # not Implemented
     }
 
