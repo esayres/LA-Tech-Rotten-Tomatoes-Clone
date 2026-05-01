@@ -8,17 +8,10 @@ def validateMovie(movieId):
     returns True if found,   False if not found 
     """
     db = getDB()
-    docs = db.collection("movies").stream()
+    query = (db.collection("movies").where("movieId", "==", movieId).limit(1).stream())
 
-    moviesList = []
-    for doc in docs:
-        movie = doc.to_dict()
-        movie["id"] = doc.id
-        moviesList.append(movie)
-
-    for movie in moviesList:
-        if movieId == movie["movieId"]:
-            return True
+    for _ in query: # found
+        return True
     return False
 
 def validateReview(movieReview, uid):
@@ -27,12 +20,11 @@ def validateReview(movieReview, uid):
     returns True if found,      False if not found
     """
     db = getDB() # gets the firestore database instance
-    docs = db.collection("reviews").stream()
+    query = (db.collection("reviews").where("userId", "==", uid).where("review", "==", movieReview).limit(1).stream())
+    # there is a bug where the user can post the same review but different case-sensitive
 
-    for doc in docs:
-        review = doc.to_dict()
-        if review["userId"] == uid and review["review"] == movieReview: # the same user already sent this review to database (prevents duplicates)
-            return True     
+    for _ in query: # found
+        return True   
     return False
 
 

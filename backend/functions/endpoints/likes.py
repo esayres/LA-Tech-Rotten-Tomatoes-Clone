@@ -30,7 +30,7 @@ def postUserLike(req): # should handle both a dislike and a like
     # 2. Parse JSON body
     body = req.get_json(silent=True)
     if not body:
-        return jsonResponse({"ok":False, "error": "Missing Body"}, status=400)
+        return jsonResponse({"ok": False, "error": "Missing Body"}, status=400)
 
     # 3. Extract fields
     movieId = body.get("movieId")
@@ -142,7 +142,7 @@ def getUserLikes(req):
     """
     res = authenticateRequest(req)
     if not res["ok"]:
-        return jsonResponse({"ok":False, "unauthorized": res['error']}, status=401)
+        return jsonResponse({"ok": False, "unauthorized": res['error']}, status=401)
     
     uid = res["user"]["uid"]
     totalLikes = 0
@@ -162,4 +162,4 @@ def getUserLikes(req):
     if totalLikes + totalDislikes > 0:
         likeRatio = totalLikes / (totalLikes + totalDislikes)
 
-    return jsonResponse({"ok": True, "data": {"totalCount": totalLikes + totalDislikes,"totalLikes": totalLikes, "totalDislikes": totalDislikes, "likeRatio": likeRatio}})
+    return jsonResponse({"ok": True, "data": {"totalCount": totalLikes + totalDislikes, "totalLikes": totalLikes, "totalDislikes": totalDislikes, "likeRatio": likeRatio}})

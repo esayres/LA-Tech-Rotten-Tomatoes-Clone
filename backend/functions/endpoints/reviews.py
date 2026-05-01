@@ -18,7 +18,7 @@ def postUserReview(req):
     # 1. Authenticate
     res = authenticateRequest(req)
     if not res["ok"]:
-        return jsonResponse({"ok":False, "unauthorized": res['error']}, status=401)
+        return jsonResponse({"ok": False, "unauthorized": res['error']}, status=401)
 
     db = getDB()
     uid = res["user"]["uid"]
@@ -26,14 +26,14 @@ def postUserReview(req):
     # 2. Parse JSON body
     body = req.get_json(silent=True)
     if not body:
-        return jsonResponse({"ok":False, "error": "Missing Body"}, status=400)
+        return jsonResponse({"ok": False, "error": "Missing Body"}, status=400)
 
     # 3. Extract fields
     movieId = body.get("movieId")
     review = body.get("review")
 
     if movieId is None or review is None:
-        return jsonResponse({"ok":False, "error": "Missing required fields (movieId, review)"}, status=400)
+        return jsonResponse({"ok": False, "error": "Missing required fields (movieId, review)"}, status=400)
 
     # 4. Build clean object
     reviewData = {
@@ -63,7 +63,7 @@ def getUserReviews(req):
     """
     res = authenticateRequest(req)
     if not res["ok"]:
-        return jsonResponse({"ok":False, "unauthorized": res['error']}, status=401)
+        return jsonResponse({"ok": False, "unauthorized": res['error']}, status=401)
     
     uid = res["user"]["uid"]
 
@@ -101,13 +101,13 @@ def getReviews(req): # for a single movie (post)
     # 2. Parse JSON body
     body = req.get_json(silent=True)
     if not body:
-        return jsonResponse({"ok":False, "error": "Missing Body"}, status=400)
+        return jsonResponse({"ok": False, "error": "Missing Body"}, status=400)
 
     # 3. Extract fields
     movieId = body.get("movieId")
 
     if movieId is None:
-        return jsonResponse({"ok":False, "error":"Missing required field (movieId)"}, status=400)
+        return jsonResponse({"ok": False, "error": "Missing required field (movieId)"}, status=400)
 
 
     db = getDB() # gets the firestore database instance

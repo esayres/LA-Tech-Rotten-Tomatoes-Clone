@@ -62,7 +62,7 @@ def getMovieScore(req):
     movieId = body.get("movieId")
 
     if movieId is None:
-        return jsonResponse({"ok":False, "error":"Missing required field (movieId)"}, status=400)
+        return jsonResponse({"ok":False, "error": "Missing required field (movieId)"}, status=400)
 
 
     db = getDB() # gets the firestore database instance
@@ -111,4 +111,4 @@ def helloWorld(req):
     # Now you're authenticated
     uid = res["user"]["uid"]
 
-    return jsonResponse({"ok": True, "data": f"Hello {uid}!"})
+    return jsonResponse({"ok": True, "data": {"Hello": uid}})
