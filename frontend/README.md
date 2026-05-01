@@ -1,50 +1,55 @@
-# Welcome to your Expo app 👋
+# MovieRate 🎬
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A premium movie rating app built with Expo, featuring glassmorphism and real-time interactions.
 
-## Get started
+## 🚀 Quick Start
 
-1. Install dependencies
+Follow these steps to get the app running on your machine:
 
+1. **Clone & Enter**
+   ```bash
+   git clone <repository-url>
+   cd frontend
+   ```
+
+2. **Install**
    ```bash
    npm install
    ```
 
-2. Start the app
-
+3. **Launch**
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+### 📱 How to View
+- **Physical Device**: Scan the QR code with your camera (iOS) or Expo Go app (Android).
+- **Simulator**: Press `i` for iOS or `a` for Android in the terminal.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+---
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## 🛠 Tech Stack
+- **Framework**: Expo (React Native) + Expo Router
+- **State**: Zustand (Global Store)
+- **Animation**: Reanimated 
+- **Styling**: Native StyleSheet + Expo Blur (Glassmorphism)
+- **Icons**: Feather & MaterialCommunityIcons
 
-## Get a fresh project
+---
 
-When you're ready, run:
+## 📂 Project Structure
+- `/app`: File-based routes (Home, Leaders, Search, Profile, Auth).
+- `/components`: Reusable UI (MovieCard, ScoreBar, VoteButtons).
+- `/store`: Global state management (`useAppStore.ts`).
+- `/utils`: Data hydration layer (`movieMapper.ts`).
 
+---
+
+## 💡 Troubleshooting
+If you see an "Unknown Module" error or styling issues, restart with a clear cache:
 ```bash
-npm run reset-project
+npx expo start --clear
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+---
+**Developed with ❤️ for the movie community.**
