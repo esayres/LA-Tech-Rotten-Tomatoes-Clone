@@ -4,9 +4,32 @@ from authenticate import authenticateRequest
 def getMovies(req):
     """
     accesses database for movies collection and then returns it to the user
+    how is request formated:
+    {header: "Authorization": bearer <idToken>}
+
+    
+    /getMovies?page=1&limit=20
     """
+   # 1. Parse query params (NOT JSON anymore)
+    queryParams = req.args if hasattr(req, "args") else {}
+
+    page = int(queryParams.get("page", 1))
+    limit = int(queryParams.get("limit", 20))
+
+    if page < 1:
+        page = 1
+    if limit < 1:
+        limit = 20
+
     db = getDB() # gets the firestore database instance
-    docs = db.collection("movies").stream() # for now we are using the test message we created in ( EVENTUALLY IT WILL BE THE MOVIES COLLECTION WHEN ITS CREATED)
+    # 2. Get total count
+    totalDocs = len(list(db.collection("movies").stream()))
+    totalPages = (totalDocs + limit - 1) // limit  # ceil division
+
+    # 3. Firestore pagination
+    offset = (page - 1) * limit
+
+    docs = (db.collection("movies").offset(offset).limit(limit).stream())
 
     movies = []
     for doc in docs:
@@ -14,11 +37,8 @@ def getMovies(req):
         movie["id"] = doc.id
         movies.append(movie)
 
-    # error handling should be added + log monitoring too maybe
-    if not movies:
-        movies = "No movies Found"
-
-    return jsonResponse({"ok": True, "data": movies})
+    # 4. Response
+    return jsonResponse({"ok": True,"data": {"movies": movies, "pagination": {"currentPage": page,"totalPages": totalPages,"totalItems": totalDocs,"limit": limit}}})
 
 
 def getMovieScore(req):
