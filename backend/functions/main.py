@@ -3,7 +3,7 @@ from firebase_functions.options import set_global_options
 from firebase import initFirebase, jsonResponse
 
 
-from endpoints.movies import getMovies, helloWorld
+from endpoints.movies import getMovies, getMovieScore, helloWorld
 from endpoints.reviews import postUserReview, getReviews, getUserReviews
 from endpoints.likes import postUserLike, getUserLikes
 # Deploy with `firebase deploy`
@@ -45,7 +45,7 @@ def api(req: https_fn.Request) -> https_fn.Response:
         "/hello": helloWorld,
         # Movies
         "/getMovies": getMovies,
-        # /getMovieScore <- NEEDED -> returns avgs, %'s, etc...
+        "/getMovieScore": getMovieScore, 
         # reviews
         "/postUserReview": postUserReview,
         "/getUserReviews": getUserReviews,
