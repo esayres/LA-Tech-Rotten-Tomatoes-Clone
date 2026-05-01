@@ -85,6 +85,14 @@ def getUserReviews(req):
 def getReviews(req): # for a single movie (post)
     """
     accesses database for reviews collection and then returns all the reviews given movieID has done
+
+    how is request formated:
+        {header: "Authorization": bearer <idToken>}
+
+    payload:
+        {
+        "movieid: int,      (the movieID)
+        }
     """
 
     # given a movieID -> return all reviews for that movie

@@ -8,7 +8,7 @@ def postUserLike(req): # should handle both a dislike and a like
 
     """
     how is request formated:
-    {header: "Authorization": bearer <idToken>}
+        {header: "Authorization": bearer <idToken>}
 
     payload:
         {
@@ -130,28 +130,36 @@ def updateLike(db, reviewData):
         break
     return
 
+
+
 # auth Needed
-def getUserLikes(req): # NOT IMPLEMENTED
+def getUserLikes(req):
     """
-    accesses database for reviews collection and then returns all the reviews given user has done
+    accesses database for likes collection and then returns all the likes given user has done (likes and dislikes)
+    
+    how is request formated:
+        {header: "Authorization": bearer <idToken>}
     """
     res = authenticateRequest(req)
     if not res["ok"]:
         return jsonResponse({"ok":False, "unauthorized": res['error']}, status=401)
     
     uid = res["user"]["uid"]
+    totalLikes = 0
+    totalDislikes = 0
+    likeRatio = 0
 
     db = getDB() # gets the firestore database instance
-    docs = db.collection("reviews").stream()
+    query = (db.collection("likes").where("userId", "==", uid).stream())
 
-    reviews = []
-    for doc in docs:
-        review = doc.to_dict()
-        review["id"] = doc.id
-        if review["userid"] == uid:
-            reviews.append(reviews)
+    for doc in query:
+        rating = doc.to_dict().get("rating", "").lower()
+        if rating == "like":
+            totalLikes += 1
+        elif rating == "dislike":
+            totalDislikes += 1
 
-    # error handling should be added + log monitoring too maybe
+    if totalLikes + totalDislikes > 0:
+        likeRatio = totalLikes / (totalLikes + totalDislikes)
 
-    return jsonResponse(reviews)
-    # error handling should be added + log monitoring too maybe
+    return jsonResponse({"ok": True, "data": {"totalCount": totalLikes + totalDislikes,"totalLikes": totalLikes, "totalDislikes": totalDislikes, "likeRatio": likeRatio}})

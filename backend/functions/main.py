@@ -52,7 +52,7 @@ def api(req: https_fn.Request) -> https_fn.Response:
         "/getReviews": getReviews, 
         # likes
         "/postUserLike": postUserLike,
-        "/getUserLikes": getUserLikes, # not Implemented
+        "/getUserLikes": getUserLikes,
     }
 
     endpointFunction = routes.get(path) # this will get the function based on the path, if the path is not in the routes, returns None

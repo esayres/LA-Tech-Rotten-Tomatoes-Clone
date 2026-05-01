@@ -14,7 +14,7 @@ load_dotenv(envPath)
 baseURL = os.getenv("BASEURL")
 urlEndpoint = f"{baseURL}/postReview" # this is the endpoint for the hello world func
 
-urlEndpoint2 = f"{baseURL}/postUserLike"
+urlEndpoint2 = f"{baseURL}/getUserLikes"
 
 #res = requests.get(urlEndpoint2)
 #print("Sending request without token....")
@@ -63,16 +63,16 @@ payload = {
     "rating": "dislike"
 }
 
-res = requests.post(urlEndpoint2, json=payload, headers=headers)
+#res = requests.post(urlEndpoint2, json=payload, headers=headers)
 
-print(res.status_code)
-print(res.json())
+#print(res.status_code)
+#print(res.json())
 
 
 
 
 # same request but now we can test if it authenticates correctly and should print uid and email
-#headers = {"Authorization": f"Bearer {idToken}"}
-#res = requests.get(urlEndpoint2, headers=headers) 
+headers = {"Authorization": f"Bearer {idToken}"}
+res = requests.get(urlEndpoint2, headers=headers) 
 #print("Sending request with token.... (should be authenticated and say hello <uid>!)")
-#print(res.json())
+print(res.json())
