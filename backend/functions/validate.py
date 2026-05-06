@@ -8,7 +8,7 @@ def validateMovie(movieId):
     returns True if found,   False if not found 
     """
     db = getDB()
-    query = (db.collection("movies").where("movieId", "==", movieId).limit(1).stream())
+    query = (db.collection("movies").order_by("movieId").where("movieId", "==", movieId).limit(1).stream())
 
     for _ in query: # found
         return True

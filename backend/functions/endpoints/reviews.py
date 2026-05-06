@@ -60,6 +60,9 @@ def postUserReview(req):
 def getUserReviews(req):
     """
     accesses database for reviews collection and then returns all the reviews given user has done
+    
+    how is request formated:
+        {header: "Authorization": bearer <idToken>}
     """
     res = authenticateRequest(req)
     if not res["ok"]:

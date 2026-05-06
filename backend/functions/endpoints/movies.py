@@ -8,37 +8,81 @@ def getMovies(req):
     {header: "Authorization": bearer <idToken>}
 
     
-    /getMovies?page=1&limit=20
+    /getMovies?startAfter=0&limit=20
     """
-   # 1. Parse query params (NOT JSON anymore)
     queryParams = req.args if hasattr(req, "args") else {}
 
-    page = int(queryParams.get("page", 1))
     limit = int(queryParams.get("limit", 20))
+    startAfterId = queryParams.get("startAfter")  # cursor
 
-    if page < 1:
-        page = 1
-    if limit < 1:
-        limit = 20
+    db = getDB()
 
-    db = getDB() # gets the firestore database instance
-    # 2. Get total count
-    totalDocs = len(list(db.collection("movies").stream()))
-    totalPages = (totalDocs + limit - 1) // limit  # ceil division
+    query = db.collection("movies").order_by("movieId").limit(limit)
 
-    # 3. Firestore pagination
-    offset = (page - 1) * limit
+    # if cursor exists, start after last document
+    if startAfterId:
+        last_doc = db.collection("movies").document(startAfterId).get()
+        if last_doc.exists:
+            query = query.start_after(last_doc)
 
-    docs = (db.collection("movies").offset(offset).limit(limit).stream())
+    docs = query.stream()
 
     movies = []
+    last_doc_id = None
+
     for doc in docs:
         movie = doc.to_dict()
         movie["id"] = doc.id
         movies.append(movie)
+        last_doc_id = doc.id
 
-    # 4. Response
-    return jsonResponse({"ok": True,"data": {"movies": movies, "pagination": {"currentPage": page,"totalPages": totalPages,"totalItems": totalDocs,"limit": limit}}})
+    return jsonResponse({
+        "ok": True,
+        "data": {
+            "movies": movies,
+            "nextCursor": last_doc_id
+        }
+    })
+    #return jsonResponse({"ok": True,"data": {"movies": movies, "pagination": {"currentPage": page,"totalPages": totalPages,"totalItems": totalDocs,"limit": limit}}})
+
+def getSingleMovie(req):
+    """
+    accesses database for movies collection and then returns it to the user
+    how is request formated:
+    {header: "Authorization": bearer <idToken>}
+
+    
+    Query Params:
+        /getSingleMovie?movieId=123
+    """
+
+    # OPTIONAL: enable auth if needed
+    # res = authenticateRequest(req)
+    # if not res["ok"]:
+    #     return jsonResponse({"ok": False, "unauthorized": res['error']}, status=401)
+
+    queryParams = req.args if hasattr(req, "args") else {}
+    movieId = queryParams.get("movieId")
+
+    if movieId is None:
+        return jsonResponse({"ok": False, "error": "movieId is required"}, status=400)
+
+    try:
+        movieId = int(movieId)
+    except:
+        return jsonResponse({"ok": False, "error": "movieId must be an integer"}, status=400)
+
+    db = getDB()
+
+    # Query by movieId field (NOT doc id)
+    query = (db.collection("movies").where("movieId", "==", movieId).limit(1).stream())
+
+    for doc in query:
+        movie = doc.to_dict()
+        movie["id"] = doc.id
+        return jsonResponse({"ok": True, "data": movie})
+
+    return jsonResponse({"ok": False, "error": "Movie not found"}, status=404)
 
 
 def getMovieScore(req):
@@ -66,7 +110,7 @@ def getMovieScore(req):
 
 
     db = getDB() # gets the firestore database instance
-    query = (db.collection("movies").where("movieId", "==", movieId).stream())
+    query = (db.collection("movies").order_by("movieId").where("movieId", "==", movieId).stream())
 
     totalLikes = 0
     totalDislikes = 0

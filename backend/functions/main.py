@@ -3,9 +3,9 @@ from firebase_functions.options import set_global_options
 from firebase import initFirebase, jsonResponse
 
 
-from endpoints.movies import getMovies, getMovieScore, helloWorld
+from endpoints.movies import getMovies, getMovieScore, getSingleMovie, helloWorld
 from endpoints.reviews import postUserReview, getReviews, getUserReviews
-from endpoints.likes import postUserLike, getUserLikes
+from endpoints.likes import postUserLike, getUserLikes, getUserLikeStats
 # Deploy with `firebase deploy`
 
 # For cost control, you can set the maximum number of containers that can be
@@ -45,6 +45,7 @@ def api(req: https_fn.Request) -> https_fn.Response:
         "/hello": helloWorld,
         # Movies
         "/getMovies": getMovies,
+        "/getSingleMovie": getSingleMovie,
         "/getMovieScore": getMovieScore, 
         # reviews
         "/postUserReview": postUserReview,
@@ -53,6 +54,7 @@ def api(req: https_fn.Request) -> https_fn.Response:
         # likes
         "/postUserLike": postUserLike,
         "/getUserLikes": getUserLikes,
+        "/getUserLikeStats": getUserLikeStats,
     }
 
     endpointFunction = routes.get(path) # this will get the function based on the path, if the path is not in the routes, returns None

@@ -2,6 +2,7 @@ import firebase_admin
 from firebase_functions import https_fn
 from firebase_admin import firestore
 import json
+import time
 
 # preventing Firebase from being initialized multiple times and breaking your deployment/runtime.
 # firebase deploy would hang and not deploy if firebase was intialized multiple times, so this is a way to prevent that from happening
@@ -13,6 +14,9 @@ def jsonResponse(data, status=200):
 def initFirebase():
     if not firebase_admin._apps:
         firebase_admin.initialize_app()
+
+def getSeverTimeStamp():
+    return int(time.time() * 1000)
 
 def getDB():
     """
