@@ -30,7 +30,18 @@ export default function ProfileScreen() {
   const recentHistory = useMemo(() => {
     return stats.votedIds.map(id => {
       const movie = movies.find(m => String(m.id) === String(id));
-      return movie ? { ...movie, vote: userVotes[id] } : null;
+      if (movie) return { ...movie, vote: userVotes[id] };
+      
+      // Fallback for movies not currently in the home feed list
+      return { 
+        id, 
+        title: `Movie #${id}`, 
+        vote: userVotes[id],
+        displayGenre: 'Voted',
+        displayYear: 'History',
+        color: '#141720',
+        emoji: '🎬'
+      };
     }).filter(Boolean);
   }, [stats.votedIds, movies, userVotes]);
 
@@ -71,11 +82,11 @@ export default function ProfileScreen() {
             <Text style={styles.statValue}>{stats.votedIds.length}</Text>
             <Text style={styles.statLabel}>Total Votes</Text>
           </View>
-          <View style={[styles.statCard, styles.statUp]}>
+          <View style={[styles.statCard]}>
             <Text style={[styles.statValue, { color: '#20c997' }]}>{stats.upCount}</Text>
             <Text style={styles.statLabel}>Upvotes</Text>
           </View>
-          <View style={[styles.statCard, styles.statDown]}>
+          <View style={[styles.statCard]}>
             <Text style={[styles.statValue, { color: '#4c6ef5' }]}>{stats.downCount}</Text>
             <Text style={styles.statLabel}>Downvotes</Text>
           </View>
@@ -89,11 +100,19 @@ export default function ProfileScreen() {
             recentHistory.map((item: any) => (
               <View key={item.id} style={styles.historyItem}>
                 <View style={[styles.historyIcon, { backgroundColor: item.color }]}>
-                  <Text>{item.emoji}</Text>
+                  {item.posterUrl ? (
+                    <Image 
+                      source={{ uri: item.posterUrl }} 
+                      style={StyleSheet.absoluteFill}
+                      contentFit="cover"
+                    />
+                  ) : (
+                    <Text>{item.emoji}</Text>
+                  )}
                 </View>
                 <View style={styles.historyInfo}>
                   <Text style={styles.historyTitle}>{item.title}</Text>
-                  <Text style={styles.historyMeta}>{item.genre} • {item.year}</Text>
+                  <Text style={styles.historyMeta}>{item.displayGenre} • {item.displayYear}</Text>
                 </View>
                 <View style={[
                   styles.voteBadge, 
@@ -245,6 +264,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
   historyInfo: {
     flex: 1,

@@ -17,7 +17,15 @@ Follow these steps to get the app running on your machine:
    npm install
    ```
 
-3. **Launch**
+3. **Environment Setup**
+   Create a `.env` file in the `frontend` directory and add your Firebase API key:
+   ```bash
+   cp .env.example .env
+   ```
+   Ensure the following variable is set:
+   - `EXPO_PUBLIC_FIREBASE_API`: Your Firebase API key.
+
+4. **Launch**
    ```bash
    npx expo start
    ```

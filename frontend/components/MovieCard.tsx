@@ -32,15 +32,24 @@ export const MovieCard: React.FC<MovieCardProps> = ({
       ]}
     >
       <View style={styles.inner}>
-        {/* Placeholder for Movie Poster/Icon */}
+        {/* Movie Poster with Fallback */}
         <View style={[styles.poster, { backgroundColor: movie.color }]}>
-          <Text style={styles.emoji}>{movie.emoji}</Text>
+          {movie.posterUrl ? (
+            <Image 
+              source={{ uri: movie.posterUrl }} 
+              style={StyleSheet.absoluteFill}
+              contentFit="cover"
+              transition={300}
+            />
+          ) : (
+            <Text style={styles.emoji}>{movie.emoji}</Text>
+          )}
         </View>
 
         <View style={styles.info}>
           <View>
             <Text style={styles.title} numberOfLines={1}>{movie.title}</Text>
-            <Text style={styles.meta}>{movie.genre} • {movie.year}</Text>
+            <Text style={styles.meta}>{movie.displayGenre} • {movie.displayYear}</Text>
           </View>
           
           <ScoreBar score={movie.score} />
@@ -92,6 +101,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
+    overflow: 'hidden',
   },
   emoji: {
     fontSize: 32,

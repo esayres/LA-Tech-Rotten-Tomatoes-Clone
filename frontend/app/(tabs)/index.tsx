@@ -17,6 +17,11 @@ export default function HomeScreen() {
   const fetchMovies = useAppStore(state => state.fetchMovies);
   const userVotes = useAppStore(state => state.userVotes);
   const toggleVote = useAppStore(state => state.toggleVote);
+  const idToken = useAppStore(state => state.idToken);
+
+  React.useEffect(() => {
+    fetchMovies();
+  }, [idToken]);
 
   const renderItem = useCallback(({ item }: { item: any }) => (
     <MovieCard 

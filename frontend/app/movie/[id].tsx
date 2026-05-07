@@ -1,11 +1,13 @@
 import React, { useMemo } from 'react';
+import { Image } from 'expo-image';
 import { 
   StyleSheet, 
   View, 
   Text, 
   SafeAreaView, 
   ScrollView, 
-  TouchableOpacity 
+  TouchableOpacity,
+  TextInput 
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useAppStore } from '../../store/useAppStore';
@@ -13,6 +15,7 @@ import { ScoreBar } from '../../components/ScoreBar';
 import { VoteButtons } from '../../components/VoteButtons';
 import { Feather } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
+import services from '../../scripts/services';
 
 export default function MovieDetailScreen() {
   const { id } = useLocalSearchParams();
@@ -25,6 +28,38 @@ export default function MovieDetailScreen() {
     movies.find(m => String(m.id) === String(id)),
     [movies, id]
   );
+
+  const [reviews, setReviews] = React.useState<any[]>([]);
+  const [detailedScore, setDetailedScore] = React.useState<any>(null);
+  const [reviewText, setReviewText] = React.useState('');
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const idToken = useAppStore(state => state.idToken);
+
+  React.useEffect(() => {
+    if (id) {
+      services.movies.getReviews(Number(id)).then(setReviews);
+      services.movies.getMovieScore(Number(id)).then(setDetailedScore);
+    }
+  }, [id]);
+
+  const handlePostReview = async () => {
+    if (!reviewText.trim() || !id) return;
+    setIsSubmitting(true);
+    try {
+      await services.movies.postUserReview(Number(id), reviewText);
+      setReviewText('');
+      const [scoreData, reviewsData] = await Promise.all([
+        services.movies.getMovieScore(Number(id)),
+        services.movies.getReviews(Number(id))
+      ]);
+      setReviews(reviewsData);
+      setDetailedScore(scoreData);
+    } catch (err) {
+      console.error('Failed to post review:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (!movie) {
     return (
@@ -42,14 +77,23 @@ export default function MovieDetailScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Header Visual */}
         <View style={[styles.hero, { backgroundColor: movie.color }]}>
-          <Text style={styles.heroEmoji}>{movie.emoji}</Text>
+          {movie.backdropUrl ? (
+            <Image 
+              source={{ uri: movie.backdropUrl }} 
+              style={StyleSheet.absoluteFill}
+              contentFit="cover"
+              transition={500}
+            />
+          ) : (
+            <Text style={styles.heroEmoji}>{movie.emoji}</Text>
+          )}
           <BlurView tint="dark" intensity={20} style={styles.overlay} />
         </View>
 
         <View style={styles.content}>
           <Text style={styles.title}>{movie.title}</Text>
           <Text style={styles.meta}>
-            {movie.year} • {movie.genre} • {movie.duration}
+            {movie.displayYear} • {movie.displayGenre} • {movie.duration}
           </Text>
 
           <View style={styles.section}>
@@ -59,7 +103,14 @@ export default function MovieDetailScreen() {
                 <Text style={[styles.bigScore, { color: movie.score >= 60 ? '#20c997' : '#fa5252' }]}>
                   {movie.score}%
                 </Text>
-                <Text style={styles.scoreLabel}>Voter Approval</Text>
+                <View>
+                  <Text style={styles.scoreLabel}>Voter Approval</Text>
+                  {detailedScore && (
+                    <Text style={styles.scoreSubLabel}>
+                      {detailedScore.totalLikes} Likes • {detailedScore.totalDislikes} Dislikes
+                    </Text>
+                  )}
+                </View>
               </View>
               <ScoreBar score={movie.score} height={8} showText={false} />
             </View>
@@ -80,6 +131,49 @@ export default function MovieDetailScreen() {
             <View style={styles.descCard}>
               <Text style={styles.descText}>{movie.desc}</Text>
             </View>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>REVIEWS ({reviews.length})</Text>
+            
+            {idToken && (
+              <View style={styles.writeReview}>
+                <TextInput
+                  style={styles.reviewInput}
+                  placeholder="Write a review..."
+                  placeholderTextColor="#4a5568"
+                  value={reviewText}
+                  onChangeText={setReviewText}
+                  multiline
+                />
+                <TouchableOpacity 
+                  style={[styles.postBtn, (!reviewText.trim() || isSubmitting) && styles.postBtnDisabled]}
+                  onPress={handlePostReview}
+                  disabled={!reviewText.trim() || isSubmitting}
+                >
+                  <Text style={styles.postBtnText}>{isSubmitting ? '...' : 'Post'}</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {(!Array.isArray(reviews) || reviews.length === 0) ? (
+              <View style={styles.emptyReviews}>
+                <Feather name="message-square" size={24} color="rgba(255,255,255,0.05)" />
+                <Text style={styles.emptyReviewsText}>No reviews yet. Be the first to write one!</Text>
+              </View>
+            ) : (
+              reviews.map((rev, idx) => (
+                <View key={idx} style={styles.reviewCard}>
+                  <View style={styles.reviewHeader}>
+                    <View style={styles.userIcon}>
+                      <Feather name="user" size={12} color="#7a8899" />
+                    </View>
+                    <Text style={styles.userId}>User {rev.userId?.slice(0, 6)}...</Text>
+                  </View>
+                  <Text style={styles.reviewText}>{rev.review}</Text>
+                </View>
+              ))
+            )}
           </View>
         </View>
       </ScrollView>
@@ -210,5 +304,90 @@ const styles = StyleSheet.create({
   backLink: {
     color: '#4c6ef5',
     fontWeight: '600',
+  },
+  scoreSubLabel: {
+    fontSize: 12,
+    color: '#5a6879',
+    marginTop: 2,
+  },
+  reviewCard: {
+    backgroundColor: '#141720',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.04)',
+  },
+  reviewHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  userIcon: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  userId: {
+    fontSize: 11,
+    color: '#7a8899',
+    fontWeight: '600',
+  },
+  reviewText: {
+    fontSize: 14,
+    color: '#a0aec0',
+    lineHeight: 20,
+  },
+  emptyReviews: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+    gap: 12,
+  },
+  emptyReviewsText: {
+    color: '#4a5568',
+    fontSize: 14,
+  },
+  writeReview: {
+    flexDirection: 'row',
+    backgroundColor: '#141720',
+    borderRadius: 16,
+    padding: 8,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+    alignItems: 'flex-end',
+    gap: 8,
+  },
+  reviewInput: {
+    flex: 1,
+    color: '#f0f2f7',
+    fontSize: 14,
+    paddingHorizontal: 12,
+    paddingTop: 8,
+    paddingBottom: 8,
+    minHeight: 40,
+    maxHeight: 120,
+  },
+  postBtn: {
+    backgroundColor: '#4c6ef5',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  postBtnDisabled: {
+    opacity: 0.5,
+    backgroundColor: '#2a3a5a',
+  },
+  postBtnText: {
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: '700',
   },
 });
