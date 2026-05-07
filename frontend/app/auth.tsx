@@ -17,13 +17,27 @@ import { useAppStore } from '../store/useAppStore';
 export default function AuthScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [mode, setMode] = useState<'signin' | 'signup'>('signin');
+  
   const login = useAppStore(state => state.login);
+  const signUp = useAppStore(state => state.signUp);
+  const isLoading = useAppStore(state => state.isLoading);
+  const error = useAppStore(state => state.error);
+  
   const router = useRouter();
 
-  const handleLogin = () => {
-    if (email && password) {
-      login(email);
+  const handleAuth = async () => {
+    if (!email || !password) return;
+    
+    try {
+      if (mode === 'signin') {
+        await login(email, password);
+      } else {
+        await signUp(email, password);
+      }
       router.replace('/(tabs)/profile');
+    } catch (err) {
+      // Error is handled in the store and displayed in UI
     }
   };
 
@@ -55,16 +69,30 @@ export default function AuthScreen() {
 
           <BlurView tint="dark" intensity={90} style={styles.glassCard}>
             <View style={styles.tabs}>
-              <View style={styles.tab}>
-                <Text style={[styles.tabText, styles.activeTab]}>Sign In</Text>
-                <View style={styles.activeIndicator} />
-              </View>
-              <View style={styles.tab}>
-                <Text style={styles.tabText}>Sign Up</Text>
-              </View>
+              <TouchableOpacity 
+                style={styles.tab} 
+                onPress={() => setMode('signin')}
+              >
+                <Text style={[styles.tabText, mode === 'signin' && styles.activeTab]}>Sign In</Text>
+                {mode === 'signin' && <View style={styles.activeIndicator} />}
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.tab} 
+                onPress={() => setMode('signup')}
+              >
+                <Text style={[styles.tabText, mode === 'signup' && styles.activeTab]}>Sign Up</Text>
+                {mode === 'signup' && <View style={styles.activeIndicator} />}
+              </TouchableOpacity>
             </View>
 
             <View style={styles.form}>
+              {error && (
+                <View style={styles.errorBox}>
+                  <Feather name="alert-circle" size={14} color="#fa5252" />
+                  <Text style={styles.errorText}>{error}</Text>
+                </View>
+              )}
+
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>EMAIL ADDRESS</Text>
                 <View style={styles.inputWrapper}>
@@ -97,10 +125,13 @@ export default function AuthScreen() {
               </View>
 
               <TouchableOpacity 
-                style={styles.cta}
-                onPress={handleLogin}
+                style={[styles.cta, isLoading && styles.ctaDisabled]}
+                onPress={handleAuth}
+                disabled={isLoading}
               >
-                <Text style={styles.ctaText}>Continue</Text>
+                <Text style={styles.ctaText}>
+                  {isLoading ? 'Processing...' : (mode === 'signin' ? 'Continue' : 'Create Account')}
+                </Text>
               </TouchableOpacity>
             </View>
           </BlurView>
@@ -268,5 +299,24 @@ const styles = StyleSheet.create({
   },
   link: {
     color: '#4c6ef5',
+  },
+  errorBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(250, 82, 82, 0.1)',
+    padding: 12,
+    borderRadius: 12,
+    gap: 8,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(250, 82, 82, 0.2)',
+  },
+  errorText: {
+    color: '#fa5252',
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  ctaDisabled: {
+    opacity: 0.6,
   },
 });

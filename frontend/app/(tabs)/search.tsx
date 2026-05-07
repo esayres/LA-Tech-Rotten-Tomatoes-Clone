@@ -21,7 +21,7 @@ export default function SearchScreen() {
   const filteredMovies = useMemo(() => 
     movies.filter(movie => 
       movie.title.toLowerCase().includes(query.toLowerCase()) ||
-      movie.genre.toLowerCase().includes(query.toLowerCase())
+      movie.displayGenre.toLowerCase().includes(query.toLowerCase())
     ),
     [movies, query]
   );
