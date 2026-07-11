@@ -1,11 +1,11 @@
 from firebase_functions import https_fn
 from firebase_functions.options import set_global_options
+from firebase import initFirebase, jsonResponse
 
 
-from authenticate import authenticateRequest
-from endpoints.movies import getMovies
-from endpoints.interactions import postReview
-
+from endpoints.movies import getMovies, getMovieScore, getSingleMovie, helloWorld
+from endpoints.reviews import postUserReview, getReviews, getUserReviews
+from endpoints.likes import postUserLike, getUserLikes, getUserLikeStats
 # Deploy with `firebase deploy`
 
 # For cost control, you can set the maximum number of containers that can be
@@ -16,6 +16,15 @@ from endpoints.interactions import postReview
 
 # this means that if there are more than 10 requests at the same time, it will start to queue them instead
 set_global_options(max_instances=10)
+
+
+"""
+all requests should follow one of these 3 patterns:
+
+{"ok": True, "data": data}                      ->              Success (request was properly processed)
+{"ok": False, "error": error_msg}               ->              Failed (some error happened and it will tell you why)
+{"ok": False, "unauthorized": error_msg}        ->              Failed (not a authorized user)
+"""
 
 
 # routing for the functions
@@ -32,34 +41,29 @@ def api(req: https_fn.Request) -> https_fn.Response:
 
     # this is where we can add more endpoints, for example /getMovies, /postReview, etc...
     routes = {
+        # testing
         "/hello": helloWorld,
+        # Movies
         "/getMovies": getMovies,
-        "/getReview": postReview,
+        "/getSingleMovie": getSingleMovie,
+        "/getMovieScore": getMovieScore, 
+        # reviews
+        "/postUserReview": postUserReview,
+        "/getUserReviews": getUserReviews,
+        "/getReviews": getReviews, 
+        # likes
+        "/postUserLike": postUserLike,
+        "/getUserLikes": getUserLikes,
+        "/getUserLikeStats": getUserLikeStats,
     }
 
     endpointFunction = routes.get(path) # this will get the function based on the path, if the path is not in the routes, returns None
 
     if endpointFunction: # if the path is valid, it will call the function and return the response
+        initFirebase()
         return endpointFunction(req)
 
-    return https_fn.Response("Not found", status=404) # if not valid path, return not found
+    return jsonResponse({"ok": False, "error": "Endpoint not found"}, status=404) # if not valid path, return not found
 
 
 
-
-# hello World function, tests authentication
-def helloWorld(req: https_fn.Request) -> https_fn.Response:
-    """
-    Hello World endpoint, a test for authentication
-    If a idToken was given in the header, it will authenicate it with firebase and say Hello
-    If a IdToken is invalid or not given, it will return Unauthorized
-    """
-    user, error = authenticateRequest(req)
-
-    if error:
-        return https_fn.Response(f"Unauthorized: {error}", status=404)
-
-    # Now you're authenticated
-    uid = user["uid"]
-
-    return https_fn.Response(f"Hello {uid}!")
